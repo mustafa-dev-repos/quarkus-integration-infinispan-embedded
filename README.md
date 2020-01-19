@@ -1,0 +1,1 @@
+# quarkus-integration-infinispan-embedded
