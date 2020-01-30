@@ -21,9 +21,7 @@ public class CacheController {
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public String customCluster(@PathParam("key") String key, @PathParam("value") String value) throws IOException {
-
 		infinispanStartupListener.putCache(key, value);
-
 		return "Success";
 	}
 

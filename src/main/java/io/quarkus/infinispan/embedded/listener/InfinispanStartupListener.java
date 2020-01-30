@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -26,18 +28,18 @@ public class InfinispanStartupListener {
 
 	@Inject
 	private InfinispanConfiguration infinispanConfiguration;
-	
+
 	private EmbeddedCacheManager cacheManager;
 	private Cache<String, String> cache;
 
-	
-    public void onStartup(@Observes StartupEvent event) throws IOException {
-		cacheManager = createCacheManager(infinispanConfiguration.getNodeName(), infinispanConfiguration.isUseXmlConfig());
+	public void onStartup(@Observes StartupEvent event) throws IOException {
+		cacheManager = createCacheManager(infinispanConfiguration.getNodeName(),
+				infinispanConfiguration.isUseXmlConfig());
 		cache = cacheManager.getCache(infinispanConfiguration.getCacheName());
 		cache.addListener(new CacheListener());
 		System.out.println("Application started.");
-    }
-    
+	}
+
 	private EmbeddedCacheManager createCacheManager(String nodeName, boolean useXmlConfig) throws IOException {
 		if (useXmlConfig) {
 			return createCacheManagerFromXml(nodeName);
@@ -72,11 +74,25 @@ public class InfinispanStartupListener {
 				return o1.getKey().compareTo(o2.getKey());
 			}
 		});
-		return entries; 
-	}	
-	
+		return entries;
+	}
+
 	public void cacheManagerClose() throws IOException {
 		cacheManager.close();
+	}
+	
+	public String getCacheValue(String key) {
+		
+		Optional<Entry<String, String>> result = getCacheContents()
+	   	.stream()
+	   	.filter(entry -> key.equals(entry.getKey()))
+	   	.findAny()
+	   	;
+	   	if (result.isPresent()) {
+	   		return result.get().getValue();
+	   	}else {
+	   		return null;
+	   	}
 	}
 
 	public void putCache(String key, String value) {
